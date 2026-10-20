@@ -6,12 +6,12 @@ set "PYTHONIOENCODING=utf-8"
 set "PYTHONUTF8=1"
 py -3 -c "import sys; raise SystemExit(sys.version_info < (3, 8))" >nul 2>&1
 if not errorlevel 1 (
-  py -3 "%~dp0diagnose.py" --open-report
+  py -3 "%~dp0start.py"
   goto :finish
 )
 python -c "import sys; raise SystemExit(sys.version_info < (3, 8))" >nul 2>&1
 if not errorlevel 1 (
-  python "%~dp0diagnose.py" --open-report
+  python "%~dp0start.py"
   goto :finish
 )
 echo 需要 Python 3.8 或更新版本。

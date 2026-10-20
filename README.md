@@ -12,14 +12,15 @@
 | Windows | [Windows ZIP](https://github.com/tinyproductlab/antigravity-diagnostics/releases/latest/download/antigravity-diagnostics-windows.zip) | `Start-Diagnostics.bat` |
 
 1. 安装 **Python 3.8 或更新版本**，下载地址为 [python.org](https://www.python.org/downloads/)。Windows 安装时启用 Add python.exe to PATH。
-2. **完整解压**下载包，在 Antigravity 重现一次问题，然后双击对应启动文件。
-3. 检测完成后自动打开同目录中文报告，最前面给出“现在该怎么做”。终端可选择打开对应官方页面；扫码或手机验证须本人完成。
+2. **完整解压**下载包，双击对应启动文件打开工具。
+3. 点击 **开始登录测试**。工具记录当前日志位置并尝试打开 Antigravity；未找到启动入口时请手动打开。
+4. 在 Antigravity 点击登录，完成你自己的账号授权。失败、卡住或成功后回到工具。
+5. 点击 **查看本次结果**：只分析测试开始后新增的日志，按“现在该怎么做”处理。可以点击验证、地区、模型权益或官方支持按钮，也可打开保存的报告。
 
-没装 Python 时，启动文件会明确说明尚未开始诊断，并询问是否打开官方安装页。安装完成后重新双击即可。
+没有 Python 时会明确提示并询问是否打开官方安装页；安装后重新双击。缺少 Tk 图形组件时自动使用终端按回车开始测试的等效流程。
+工具不会代替你选择账号、接受条款、扫码或提交验证。
 
-账号验证给出验证→重登步骤；地区错误给出关联地区/官方范围核对；网络错误区分 localhost 本地服务与外部连接。没有证据时明确提示重现故障，不声称已经修好。
-
-Mac 版已在本机运行；Windows 已通过路径、代理读取及诊断规则的模拟测试，**尚未在 Windows 实机验证**。
+Mac 已验证诊断核心与日志采集；新图形界面尚未实机操作验证。Windows 已通过路径、代理与采集规则模拟测试，**尚未在 Windows 实机验证**。
 
 ## 检查什么
 

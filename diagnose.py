@@ -268,6 +268,7 @@ def open_report(path):
 
 def main():
     parser=argparse.ArgumentParser(description='Antigravity 只读诊断：本地日志、网络及建议')
+    parser.add_argument('--snapshot', type=Path, help=argparse.SUPPRESS)
     parser.add_argument('--open-report', action='store_true', help='诊断后打开本地中文报告')
     parser.add_argument('--offline', action='store_true', help='不发起网络探测')
     parser.add_argument('--log', action='append', type=Path, help='额外日志，可重复指定')
@@ -276,6 +277,10 @@ def main():
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     home=Path.home()
+    snapshot=None
+    if args.snapshot:
+        import json
+        snapshot=json.loads(args.snapshot.read_text(encoding='utf-8'))
     lines=['Antigravity 登录与使用诊断报告',dt.datetime.now().astimezone().isoformat(timespec='seconds'),
            '', '检查方式：只读日志及网络状态；不读取账号凭据、不修改代理、不删除配置。',
            '报告不包含原始日志、邮箱、令牌、完整验证链接或公网 IP。','']
@@ -294,11 +299,18 @@ def main():
     all_keys=[]
     network_failed=False
     found=0
+    login_success=False
     for path in candidates:
         try:
-            text=tail(path)
+            if snapshot is not None:
+                from live_test import fresh_tail
+                text=fresh_tail(path,snapshot)
+                if not text.strip():continue
+            else:
+                text=tail(path)
             active,history,success,new_urls=analyze(text)
             found+=1
+            login_success=login_success or success
             if dt.datetime.now().timestamp()-path.stat().st_mtime <= 86400:
                 all_keys.extend(x[0] for x in active)
             else:
@@ -323,7 +335,9 @@ def main():
             lines += ['']
         except (OSError, ValueError):
             lines += ['某份日志无法读取，已跳过。']
-    if not found:
+    if not found and snapshot is not None:
+        lines += ['本次测试尚未读到新增日志。请确认已从应用重试登录，再点击查看结果。不同版本日志位置可能需要手动指定。','']
+    elif not found:
         lines += ['未找到可读日志。请先在 Antigravity 重现一次失败，再重新运行。',
                   '仅安装桌面版时，CLI 日志可能不存在；本工具不会为诊断自动安装 CLI。','']
     if not args.offline:
@@ -341,6 +355,10 @@ def main():
               '官方资料：'+FAQ,'账号验证说明：https://support.google.com/accounts/answer/15437069',
               '模型资格：https://www.antigravity.google/docs/models/']
     plan=next_steps(all_keys,found,network_failed)
+    if snapshot is not None and login_success and not all_keys and not network_failed:
+        plan=['本次登录测试结果','新增日志已出现登录成功事件，未匹配到后续待处理错误。','请确认应用已进入主界面；缺少模型时另行核对订阅权益。','']
+    if snapshot is not None:
+        plan.insert(1,'本次登录测试：仅分析点击开始之后新增的日志。没有错误线索不代表已完成登录。')
     lines=lines[:6]+['']+plan+['详细检查结果']+lines[6:]
     report='\n'.join(lines)+'\n'
     destination=args.output or Path(__file__).resolve().parent/('诊断报告-'+dt.datetime.now().strftime('%Y%m%d-%H%M%S')+'.txt')

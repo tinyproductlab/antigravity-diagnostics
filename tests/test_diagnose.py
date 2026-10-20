@@ -76,4 +76,35 @@ class ActionTests(unittest.TestCase):
         from diagnose import next_steps
         self.assertIn('定位网络','\n'.join(next_steps([],1,True)))
 
+class LiveTests(unittest.TestCase):
+    def test_old_failure_ignored_and_appended_failure_detected(self):
+        import tempfile
+        from pathlib import Path
+        from live_test import capture,fresh_tail
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'main.log';p.write_text('VALIDATION_REQUIRED\n')
+            start=capture([p])
+            self.assertEqual(fresh_tail(p,start),'')
+            with p.open('a') as f:f.write('UNSUPPORTED_LOCATION\n')
+            self.assertEqual(fresh_tail(p,start),'UNSUPPORTED_LOCATION\n')
+    def test_new_and_rotated_files(self):
+        import tempfile
+        from pathlib import Path
+        from live_test import capture,fresh_tail
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'main.log';p.write_text('previous session')
+            start=capture([p])
+            p.write_text('Auth succeeded new session longer than previous')
+            self.assertIn('Auth succeeded',fresh_tail(p,start))
+            q=Path(d)/'new.log';q.write_text('VALIDATION_REQUIRED')
+            self.assertEqual(fresh_tail(q,start),'VALIDATION_REQUIRED')
+    def test_truncated_file_read_from_start(self):
+        import tempfile
+        from pathlib import Path
+        from live_test import capture,fresh_tail
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'main.log';p.write_text('x'*2000)
+            start=capture([p]);p.write_text('invalid_grant')
+            self.assertEqual(fresh_tail(p,start),'invalid_grant')
+
 if __name__=='__main__':unittest.main()
