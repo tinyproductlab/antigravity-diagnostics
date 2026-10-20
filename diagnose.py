@@ -175,9 +175,14 @@ ACTION_STEPS = {
    '看到验证成功后，回到 Antigravity，从应用重新发起登录。',
    '若仍停在欢迎页，刷新应用窗口；等待几分钟同步后再试。旧链接失效时先重现错误，再运行本工具。']),
  'region': ('核对地区资格', [
-   '打开 Google 条款页，查看页面底部显示的账号关联国家/地区。',
-   '打开官方支持地区列表，核对实际所在地是否支持。节点名字或网页能打开不能证明资格正常。',
-   '关联地区确有错误时，通过 Google 官方渠道申请更正；所在地暂不支持时，脚本不能解除限制。']),
+   '在浏览器登录与 Antigravity 相同的 Google 账号，打开 https://policies.google.com/terms 。',
+   '查看条款页显示的国家/地区；若无法确认，先核对右上角登录账号。网页语言不等于账号地区。',
+   '打开官方支持范围：'+FAQ+'#what-is-google-antigravitys-geographical-availability ，同时核对实际所在地。',
+   '账号关联地区与代理节点地区不是一回事；不要仅凭节点名称判断资格。',
+   '若关联地区确实不符实际情况，打开 https://policies.google.com/country-association-form ，填写真实情况，由本人提交 Google 审核。',
+   '提交后等待 Google 审核；申请不保证通过，也不能承诺具体生效时间。',
+   '收到更正生效的通知后，正常退出 Antigravity 账号并重新登录，再开始一次登录测试。',
+   '若实际所在地不受支持或仍被拒绝，向官方支持提供错误时间和本报告。脚本不能解除地区限制。']),
  'age': ('完成官方年龄核验', [
    '打开官方 FAQ 的年龄说明，进入其中的年龄验证入口。',
    '仅在满足年龄要求时按 Google 提示完成验证，然后重新登录。不要反复更改生日。']),
@@ -246,7 +251,8 @@ def offer_actions(keys, urls, destination):
     if urls: actions.append(('打开账号验证入口（可能需本人手机扫码）',urls[-1]))
     if 'region' in keys:
         actions.extend([('查看 Google 账号关联地区','https://policies.google.com/terms'),
-                        ('查看官方支持地区',FAQ+'#what-is-google-antigravitys-geographical-availability')])
+                        ('查看官方支持地区',FAQ+'#what-is-google-antigravitys-geographical-availability'),
+                        ('打开关联地区更正申请（由本人填写提交）','https://policies.google.com/country-association-form')])
     if 'age' in keys: actions.append(('查看官方年龄验证说明',FAQ+'#why-is-my-age-unverified'))
     actions.extend([('查看模型权益说明','https://www.antigravity.google/docs/models/'),
                     ('打开官方支持入口','https://antigravity.google/support')])

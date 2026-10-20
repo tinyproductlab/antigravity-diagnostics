@@ -22,6 +22,25 @@
 
 Mac 已验证诊断核心与日志采集；新图形界面尚未实机操作验证。Windows 已通过路径、代理与采集规则模拟测试，**尚未在 Windows 实机验证**。
 
+## Mac 首次打开被拦截
+
+下载包内附 **Mac-首次使用说明.txt**，首次打不开时先阅读。
+
+本工具是未经过 Apple 签名/公证的开源脚本。仅在确认来源、核对内容并信任文件后，遇到“无法验证开发者”或“Apple 无法检查是否包含恶意软件”的提示，可先尝试打开，再进入 **系统设置 → 隐私与安全性 → 核对文件名 → 仍要打开**，由本人确认。
+
+如果提示“将损坏你的电脑”、明确检测到恶意软件或文件损坏，请停止运行并核对发布文件。不要关闭系统安全保护或盲目移除隔离属性。参见 [Apple 官方说明](https://support.apple.com/zh-cn/102445)。
+
+## 地区错误如何处理
+
+1. 在浏览器登录与 Antigravity 相同的 Google 账号，打开 https://policies.google.com/terms 。
+2. 查看条款页显示的国家/地区；若无法确认，先核对右上角登录账号。网页语言不等于账号地区。
+3. 打开官方支持范围：https://www.antigravity.google/docs/faq/#what-is-google-antigravitys-geographical-availability ，同时核对实际所在地。
+4. 账号关联地区与代理节点地区不是一回事；不要仅凭节点名称判断资格。
+5. 若关联地区确实不符实际情况，打开 https://policies.google.com/country-association-form ，填写真实情况，由本人提交 Google 审核。
+6. 提交后等待 Google 审核；申请不保证通过，也不能承诺具体生效时间。
+7. 收到更正生效的通知后，正常退出 Antigravity 账号并重新登录，再开始一次登录测试。
+8. 若实际所在地不受支持或仍被拒绝，向官方支持提供错误时间和本报告。脚本不能解除地区限制。
+
 ## 检查什么
 
 - 额外账号验证：`VALIDATION_REQUIRED`、`validation_url`。

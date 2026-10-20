@@ -9,7 +9,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
 import webbrowser
-from diagnose import analyze, log_paths, FAQ
+from diagnose import analyze, log_paths, FAQ, ACTION_STEPS
 from live_test import capture, fresh_tail
 
 
@@ -81,14 +81,22 @@ def run():
         text.delete('1.0','end');append(report.read_text(encoding='utf-8'))
         status.set('本次结果已生成。按“现在该怎么做”处理；完成后可重新开始测试验证。')
         for child in actions.winfo_children():child.destroy()
-        def link(label,url):ttk.Button(actions,text=label,command=lambda:webbrowser.open(url)).pack(side='left',padx=(0,8),pady=4)
+        button_count=[0]
+        def button(label,callback):
+            i=button_count[0];button_count[0]+=1
+            ttk.Button(actions,text=label,command=callback).grid(row=i//3,column=i%3,sticky='w',padx=(0,8),pady=4)
+        def link(label,url):button(label,lambda:webbrowser.open(url))
         if urls:link('打开账号验证',urls[-1])
         keys={x[0] for x in active}
-        if 'region' in keys:link('核对关联地区','https://policies.google.com/terms')
+        if 'region' in keys:
+            button('关联地区处理步骤',lambda:messagebox.showinfo('关联地区处理步骤','\n\n'.join(str(i)+'. '+step for i,step in enumerate(ACTION_STEPS['region'][1],1))))
+            link('核对关联地区','https://policies.google.com/terms')
+            link('官方支持范围',FAQ+'#what-is-google-antigravitys-geographical-availability')
+            link('申请更正关联地区','https://policies.google.com/country-association-form')
         if 'age' in keys:link('年龄验证说明',FAQ+'#why-is-my-age-unverified')
         link('模型权益','https://www.antigravity.google/docs/models/')
         link('官方支持','https://antigravity.google/support')
-        ttk.Button(actions,text='打开报告',command=lambda:open_result(report)).pack(side='left',pady=4)
+        button('打开报告',lambda:open_result(report))
 
     def open_result(path):
         from diagnose import open_report

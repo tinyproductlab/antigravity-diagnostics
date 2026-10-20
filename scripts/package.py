@@ -9,7 +9,9 @@ checks=[]
 for system,launcher in [('macos','Start-Diagnostics.command'),('windows','Start-Diagnostics.bat')]:
     filename='antigravity-diagnostics-'+system+'.zip'
     with zipfile.ZipFile(OUT/filename,'w',zipfile.ZIP_DEFLATED) as archive:
-        for name in ['diagnose.py','start.py','gui.py','live_test.py',launcher,'README.md']:
+        names=['diagnose.py','start.py','gui.py','live_test.py',launcher,'README.md']
+        if system=='macos':names.append('Mac-首次使用说明.txt')
+        for name in names:
             archive.write(ROOT/name,'antigravity-diagnostics/'+name)
     with zipfile.ZipFile(OUT/filename) as archive:
         assert archive.testzip() is None

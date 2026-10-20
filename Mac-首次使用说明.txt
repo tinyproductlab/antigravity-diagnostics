@@ -1,0 +1,39 @@
+Mac 首次使用：先看这里
+
+1. 将 ZIP 完整解压，保留文件夹中的全部文件。
+2. 双击 Start-Diagnostics.command。
+3. 未安装可用 Python 3.8+ 时，启动窗口会说明“诊断尚未开始”，并询问是否打开 Python 官方安装页。
+   安装完成后重新双击 Start-Diagnostics.command。
+4. 点击“开始登录测试”，到 Antigravity 重试登录，再回来点击“查看本次结果”。
+   Python 的图形组件不可用时，会使用终端按回车完成相同流程。
+
+如果首次打开被 macOS 拦截
+
+本工具是公开源码脚本，未经过 Apple 开发者签名或公证。安全提示不代表已经检测出恶意软件，也不能证明文件安全。
+仅当确认文件来自 https://tinylabpro.com/downloads/antigravity/ 或
+https://github.com/tinyproductlab/antigravity-diagnostics/releases ，并信任且核对过所下载内容时，才按以下步骤允许这一个文件运行。
+
+如果提示是“无法验证开发者”或“Apple 无法检查是否包含恶意软件”：
+1. 先尝试双击 Start-Diagnostics.command，关闭提示框。
+2. 打开苹果菜单 → 系统设置 → 隐私与安全性。
+   较旧 macOS 的入口可能叫“系统偏好设置 → 安全性与隐私 → 通用”。
+3. 向下找到针对 Start-Diagnostics.command 的拦截记录，核对文件名，选择“仍要打开”。
+4. 按系统要求完成本人密码或触控 ID 确认，再选择“打开”。
+5. 回到工具继续使用。没有“仍要打开”时不要关闭整机安全保护，先查看 Apple 官方说明。
+
+如果提示“将损坏你的电脑”、明确检测到恶意软件或文件已损坏：
+不要按上述步骤强行运行。停止打开，重新从发布页核对文件与 SHA-256，向维护者提供提示截图。
+工具不会自动关闭 Gatekeeper、移除下载隔离属性或修改系统安全设置。
+
+Apple 官方说明：https://support.apple.com/zh-cn/102445
+
+关联地区的详细处理步骤
+
+当本次日志明确报告地区不支持时，报告会给出：
+1. 登录与 Antigravity 相同的账号，打开 https://policies.google.com/terms 查看关联国家或地区。
+2. 对照 https://www.antigravity.google/docs/faq/ 的官方支持地区，核对实际所在地。
+3. 账号关联地区不等于代理节点地区。
+4. 关联地区确有错误时，通过 https://policies.google.com/country-association-form 填写真实情况，由本人提交审核。
+5. 等待 Google 审核及生效通知；不保证通过，也不能保证具体时长。
+6. 更正生效后，正常退出 Antigravity 账号并重新登录，再运行一次登录测试。
+7. 实际所在地不支持或仍被拒绝时，联系官方支持；工具不能解除地区限制。
