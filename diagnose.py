@@ -169,8 +169,106 @@ def probe(host):
         return host,'连接失败或超时'
 
 
+ACTION_STEPS = {
+ 'validation': ('完成 Google 额外账号验证', [
+   '选择下方“打开账号验证入口”，按网页要求用手机扫码或完成设备验证。',
+   '看到验证成功后，回到 Antigravity，从应用重新发起登录。',
+   '若仍停在欢迎页，刷新应用窗口；等待几分钟同步后再试。旧链接失效时先重现错误，再运行本工具。']),
+ 'region': ('核对地区资格', [
+   '打开 Google 条款页，查看页面底部显示的账号关联国家/地区。',
+   '打开官方支持地区列表，核对实际所在地是否支持。节点名字或网页能打开不能证明资格正常。',
+   '关联地区确有错误时，通过 Google 官方渠道申请更正；所在地暂不支持时，脚本不能解除限制。']),
+ 'age': ('完成官方年龄核验', [
+   '打开官方 FAQ 的年龄说明，进入其中的年龄验证入口。',
+   '仅在满足年龄要求时按 Google 提示完成验证，然后重新登录。不要反复更改生日。']),
+ 'expired': ('刷新登录凭据', [
+   '在 Antigravity 的账号菜单正常退出登录。',
+   '从应用重新发起登录，选择订阅对应的 Google 账号，只完成最新的一次授权。',
+   '若反复提示 invalid_grant，核对电脑日期与时间是否自动同步，再重试。']),
+ 'quota': ('处理配额限制', [
+   '在 Antigravity 的用量页面查看剩余额度和重置时间。',
+   '等待额度重置，或选择账号实际可用且还有额度的模型。',
+   '付费权益未识别时核对订阅账号；不要通过反复登录或删除配置尝试增加额度。']),
+ 'billing': ('检查企业许可证或计费', [
+   '个人用户：核对登录账号与订阅所属账号是否一致。',
+   '企业用户：将本报告交给管理员，检查项目 IAM、许可证、计费账户和组织限制。']),
+ 'tls': ('修复证书连接条件', [
+   '检查系统日期与时间是否正确，并开启自动同步。',
+   '若使用企业网络或 HTTPS 检查代理，请管理员配置可信证书链。',
+   '随后重新登录并重跑检测；不要关闭证书校验。']),
+ 'dns': ('检查域名解析', [
+   '在浏览器打开 Google 登录页，确认当前网络可访问。',
+   '在正在使用的代理软件中查看 Google 域名的 DNS 与连接日志；TUN 合成地址本身不等于故障。',
+   '若为企业网络，将 DNS 错误和报错时间交给管理员；修正网络配置后重试。']),
+ 'network': ('定位网络或本地服务故障', [
+   '先核对报错目标：localhost/127.0.0.1 指向应用本地服务，正常退出并重新打开应用后再试。',
+   '若是外部 Google 域名，检查当前代理的连接记录，确认 Antigravity 进程有请求与响应。',
+   '查看下方连通性结果；若只有浏览器可用，请检查应用代理路径。修正配置后重新登录并重跑检测。']),
+ 'callback': ('重新建立浏览器授权回调', [
+   '从 Antigravity 重新点击登录，完成刚打开的最新授权页面。',
+   '浏览器询问是否打开 Antigravity 时允许本次打开。',
+   '若回调目标为 localhost，检查本地回环地址是否被代理或防火墙错误拦截。']),
+ 'keyring': ('检查凭据保存状态', [
+   'Mac 检查“钥匙串访问”是否解锁；Windows 检查凭据管理器和组织策略。',
+   '若日志同时提示 falling back to file，说明已有回退保存；优先处理其他明确错误。']),
+ 'permission': ('查清具体拒绝原因', [
+   '通用 403 无法直接确定地区问题。查看报告是否同时有账号验证、年龄、地区或许可证信号。',
+   '个人用户确认是自己的正确 Google 账号；企业用户请管理员核对 IAM 与组织策略。',
+   '仍无具体原因时，将本次故障时间与本报告发给官方支持。']),
+ 'crash': ('恢复本地客户端', [
+   '保存正在进行的工作，正常退出并重新打开 Antigravity。',
+   '检查官方更新，再重现一次问题并运行本工具。不要先删除整个账号或配置目录。']),
+}
+
+def next_steps(keys, found, network_failed=False):
+    keys=list(dict.fromkeys(keys))
+    if network_failed and not any(k in keys for k in ('network','dns','tls')):
+        keys.append('network')
+    if not keys:
+        return ['现在该怎么做',
+                '尚无足够证据确定当前根因。'+('本机未找到日志。' if not found else '已读日志未匹配到当前错误。'),
+                '1. 保持工具所在文件夹打开，在 Antigravity 重现一次失败。',
+                '2. 立即重新双击运行，再核对报告里的日志更新时间是否对应本次失败。',
+                '3. 若只是缺少模型，选择“查看模型权益说明”，核对付费/试用/赠送方案及订阅账号。',
+                '4. 仍无法定位时，选择“打开官方支持入口”，提供故障发生时间、本报告和界面截图。','']
+    out=['现在该怎么做（按日志线索给出的操作顺序）']
+    for key in ACTION_STEPS:
+        if key not in keys: continue
+        title,steps=ACTION_STEPS[key]
+        out.append('【'+title+'】')
+        out.extend(str(i)+'. '+step for i,step in enumerate(steps,1))
+        out.append('')
+    return out
+
+def offer_actions(keys, urls, destination):
+    import webbrowser
+    actions=[]
+    if urls: actions.append(('打开账号验证入口（可能需本人手机扫码）',urls[-1]))
+    if 'region' in keys:
+        actions.extend([('查看 Google 账号关联地区','https://policies.google.com/terms'),
+                        ('查看官方支持地区',FAQ+'#what-is-google-antigravitys-geographical-availability')])
+    if 'age' in keys: actions.append(('查看官方年龄验证说明',FAQ+'#why-is-my-age-unverified'))
+    actions.extend([('查看模型权益说明','https://www.antigravity.google/docs/models/'),
+                    ('打开官方支持入口','https://antigravity.google/support')])
+    while True:
+        print('\n下一步操作（只打开你选择的页面，不改变账号设置）：')
+        for i,(title,_) in enumerate(actions,1):print('  '+str(i)+'. '+title)
+        print('  0. 完成并退出')
+        answer=input('请输入数字并回车：').strip()
+        if answer=='0' or not answer:return
+        if answer.isdigit() and 1<=int(answer)<=len(actions):
+            opened=webbrowser.open(actions[int(answer)-1][1])
+            print('已请求浏览器打开。完成页面操作后，请回到应用重新登录并重跑诊断。' if opened else '浏览器未能自动打开；请按报告中的官方资料入口继续。')
+        else:print('请输入列表中的数字。')
+
+def open_report(path):
+    if sys.platform=='darwin':subprocess.run(['open',str(path)],check=False)
+    elif sys.platform=='win32':os.startfile(str(path))
+
+
 def main():
     parser=argparse.ArgumentParser(description='Antigravity 只读诊断：本地日志、网络及建议')
+    parser.add_argument('--open-report', action='store_true', help='诊断后打开本地中文报告')
     parser.add_argument('--offline', action='store_true', help='不发起网络探测')
     parser.add_argument('--log', action='append', type=Path, help='额外日志，可重复指定')
     parser.add_argument('--output', type=Path, help='报告保存路径')
@@ -193,12 +291,18 @@ def main():
         lines += windows_proxy_summary()+['']
     candidates=list(log_paths(home)) if not args.log else args.log
     urls=[]
+    all_keys=[]
+    network_failed=False
     found=0
     for path in candidates:
         try:
             text=tail(path)
             active,history,success,new_urls=analyze(text)
             found+=1
+            if dt.datetime.now().timestamp()-path.stat().st_mtime <= 86400:
+                all_keys.extend(x[0] for x in active)
+            else:
+                new_urls=[]
             label=str(path).replace(str(home),'~')
             modified=dt.datetime.fromtimestamp(path.stat().st_mtime).astimezone().strftime('%Y-%m-%d %H:%M:%S %z')
             lines += ['日志：'+label, '最后修改：'+modified]
@@ -226,7 +330,9 @@ def main():
         lines += ['HTTPS 连通性探测（不发送账号凭据，仅检查当前脚本的网络路径）：']
         hosts=['accounts.google.com','antigravity.google','cloudcode-pa.googleapis.com','daily-cloudcode-pa.googleapis.com']
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-            for host,status in pool.map(probe,hosts): lines += ['  '+host+'：'+status]
+            for host,status in pool.map(probe,hosts):
+                lines += ['  '+host+'：'+status]
+                if '收到 HTTPS 响应' not in status: network_failed=True
         lines += ['探测成功不代表账号有权益，也不能完全代表 Antigravity 进程的网络路径。','']
     lines += ['尚不能自动判定：账号真实关联地区、年龄、订阅类型、单个模型权益及服务端风控。',
               '缺少模型时，请核对正式付费/试用/合作伙伴赠送方案；脚本不能开通付费权益。',
@@ -234,6 +340,8 @@ def main():
               '若仍无结论：先重现故障，再把本报告交给支持人员；不要公开完整日志。','',
               '官方资料：'+FAQ,'账号验证说明：https://support.google.com/accounts/answer/15437069',
               '模型资格：https://www.antigravity.google/docs/models/']
+    plan=next_steps(all_keys,found,network_failed)
+    lines=lines[:6]+['']+plan+['详细检查结果']+lines[6:]
     report='\n'.join(lines)+'\n'
     destination=args.output or Path(__file__).resolve().parent/('诊断报告-'+dt.datetime.now().strftime('%Y%m%d-%H%M%S')+'.txt')
     try:
@@ -244,14 +352,11 @@ def main():
         destination=None
     print(report)
     if destination: print('报告已保存：'+str(destination))
-    urls=list(dict.fromkeys(urls))
-    if urls and sys.stdin.isatty():
-        print('\n发现 Google 官方验证入口。链接只在本机使用，不写入报告。')
-        answer=input('是否打开最近找到的验证入口？输入 y 打开，其他键跳过：').strip().lower()
-        if answer=='y':
-            import webbrowser
-            webbrowser.open(urls[-1])
-            print('请本人完成验证，再回应用重新登录；旧链接若失效，请重现失败后重跑诊断。')
+    if destination and args.open_report:
+        try: open_report(destination)
+        except OSError: print('报告未能自动打开，请到上述路径手动查看。')
+    if sys.stdin.isatty():
+        offer_actions(all_keys,list(dict.fromkeys(urls)),destination)
 
 if __name__=='__main__':
     try: main()

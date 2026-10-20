@@ -58,4 +58,22 @@ class WindowsTests(unittest.TestCase):
         def denied():raise PermissionError('private registry')
         self.assertIn('无法读取',windows_proxy_summary(denied)[0])
 
+class ActionTests(unittest.TestCase):
+    def test_validation_has_concrete_steps(self):
+        from diagnose import next_steps
+        plan='\n'.join(next_steps(['validation'],1))
+        self.assertIn('手机扫码',plan)
+        self.assertIn('重新发起登录',plan)
+    def test_region_has_official_path(self):
+        from diagnose import next_steps
+        plan='\n'.join(next_steps(['region'],1))
+        self.assertIn('账号关联',plan)
+        self.assertIn('不能解除',plan)
+    def test_no_error_is_not_claimed_fixed(self):
+        from diagnose import next_steps
+        self.assertIn('尚无足够证据','\n'.join(next_steps([],1)))
+    def test_network_probe_failure_adds_network_steps(self):
+        from diagnose import next_steps
+        self.assertIn('定位网络','\n'.join(next_steps([],1,True)))
+
 if __name__=='__main__':unittest.main()
