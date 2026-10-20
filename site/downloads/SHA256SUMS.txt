@@ -1,0 +1,2 @@
+20634d43f44539aeee15f7df5388525819340b5b4196ab7b8197b8d868a75cfd  antigravity-diagnostics-macos.zip
+6c86f84832dc8889f6810f995618b71feb66eb40d37e62bb6c552bed4bd0cfef  antigravity-diagnostics-windows.zip
